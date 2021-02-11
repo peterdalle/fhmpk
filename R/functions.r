@@ -5,7 +5,7 @@
 #'
 #' @examples
 press_conferences <- function() {
-  df <- rio::import("Dagar.xlsx")
+  df <- rio::import("../Data/Dagar.xlsx")
   df <- df %>% 
     mutate(veckodag = as.factor(veckodag),
            presskonferens = case_when(
@@ -46,7 +46,7 @@ covid_deaths_socialstyrelsen <- function() {
 #'
 #' @examples
 content_analysis <- function() {
-  filename <- "data/covid-210201_1.sav"
+  filename <- "../Data/covid-210201_1.sav"
   content <- rio::import(filename)
   content <- rio::factorize(content)
   content$id <- seq.int(1, NROW(content))
