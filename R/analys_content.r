@@ -17,10 +17,10 @@ m %>%
   group_by(Medium) %>% 
   summarize(forsta_dag = min(dag),
             senaste_dag = max(dag),
-            kritik_mean = mean(kritik_mean, na.rm=TRUE),
+            kritik_mean = mean(kritik_mean),
             n = n())
 
-# Frekvens på varje variabel för lite känsla över materialet.
+# Frekvens på varje variabel.
 furniture::tableF(m, Datum)
 furniture::tableF(m, dag)
 furniture::tableF(m, Medium)
@@ -99,6 +99,18 @@ furniture::table1(m,
     rounding_perc=0,
     output = "pandoc")
 
+# Kritiska frågor i procent.
+kritik_percent <- kritiska_fragor_procent(m)
+
+# Genomsnitt andel kritiska frågor (i procent) för respektive medium.
+# (sammanvägt mått i tabell 1).
+kritik_percent %>% 
+  group_by(medium) %>% 
+  summarize(mean_kritik = mean(percent),
+            median_kritik = mean(percent_median)) %>%
+  mutate(total = sum(mean(mean_kritik)))
+
+
 # Plocka ut några exmepel på kritiska frågor.
 m %>% 
   filter(Ansvarsutkrävande == "Varför" & 
@@ -106,18 +118,10 @@ m %>%
            #Fientlig == "Söker svar" & 
            Men == "Ja" &
            NegativForm == "Ja" 
-           #Uppföljningsfråga == "Nej"
-         ) %>% 
+         #Uppföljningsfråga == "Nej"
+  ) %>% 
   pull(dag, Transkribering) %>% 
   head(10)
-
-# Kritiska frågor i procent.
-kritik_percent <- kritiska_fragor_procent(m)
-
-# Genomsnitt andel kritiska frågor (i procent) för respektive medium.
-kritik_percent %>% 
-  group_by(medium) %>% 
-  summarize(mean_kritik = mean(y))
 
 
 # Figur 2. Andel kritiska frågor över tid.
@@ -129,10 +133,16 @@ ggsave("plot_kritik.png", plot_kritik, width=190, height=100, units="mm")
 
 
 # Figur 3. Andel kritiska frågor per intervjuare.
-plot_intervjuare <- kritiska_fragor_intervjuare_plot(m)
+plot_intervjuare <- kritiska_fragor_intervjuare_plot(m, FUNC=mean)
 plot_intervjuare
 ggsave("plot_intervjuare.pdf", plot_intervjuare, width=170, height=140, units="mm")
 ggsave("plot_intervjuare.png", plot_intervjuare, width=190, height=140, units="mm")
+
+
+# Andel kritiska frågor per svenska/utländska journalister.
+kritik_sverige_utlandska <- kritiska_fragor_sverige_utlandet(m)
+kritik_sverige_utlandska %>% 
+  filter(kritik == 1)
 
 
 # Plocka ut andelen topp-ämnen per dag och turordningar/frågor.
