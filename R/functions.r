@@ -5,7 +5,7 @@
 #'
 #' @examples
 press_conferences <- function() {
-  df <- rio::import("../Data/Dagar.xlsx")
+  df <- rio::import("../data/Dagar.xlsx")
   df <- df %>% 
     mutate(veckodag = as.factor(veckodag),
            presskonferens = case_when(
@@ -27,7 +27,8 @@ press_conferences <- function() {
 covid_deaths_socialstyrelsen <- function() {
   # Data från Socialstyrelsen, sammanställd av Adam Altmejd
   url <- "https://github.com/adamaltmejd/covid/blob/master/data/Socialstyrelsen_latest.csv?raw=true"
-  covid <- read.csv(url)
+  download.file(url, destfile = "../data/socialstyrelsen_latest.csv")
+  covid <- read.csv("../data/socialstyrelsen_latest.csv")
   covid_deaths_per_day <- covid %>% 
     filter(!(is.na(date) | date == "")) %>% 
     mutate(date = as.Date(date)) %>% 
@@ -46,7 +47,7 @@ covid_deaths_socialstyrelsen <- function() {
 #'
 #' @examples
 content_analysis <- function() {
-  filename <- "../Data/covid-210201_1.sav"
+  filename <- "../data/covid-210201_1.sav"
   content <- rio::import(filename)
   content <- rio::factorize(content)
   content$id <- seq.int(1, NROW(content))
@@ -318,16 +319,17 @@ kritiska_fragor_per_indikator_plot <- function(m) {
 #' Skapa figur med andel (i procent) kritiska frågor per intervjuare.
 #'
 #' @param m data frame med innehållsanalys.
+#' @param FUNC funktion för statistik/centralmått (t ex `mean`, `median`).
 #'
 #' @return ggplot-figur.
 #' @export
 #'
 #' @examples
-kritiska_fragor_intervjuare_plot <- function(m) {
+kritiska_fragor_intervjuare_plot <- function(m, FUNC) {
   # Turordningar per intervjuare under presskonferens.
   topp_intervjuare <- m %>% 
     filter(Medium == "FHM presskonferens") %>% 
-    mutate(kritik = if_else(kritik_mean > median(kritik_mean), 1, 0),
+    mutate(kritik = if_else(kritik_mean > FUNC(kritik_mean), 1, 0),
            Intervjuare = case_when(
              Intervjuare == "Vetenskapsradion" ~ "SR Vetenskapsradion",
              Intervjuare == "Frilans" ~ "Frilansjournalist",
@@ -341,6 +343,8 @@ kritiska_fragor_intervjuare_plot <- function(m) {
              Intervjuare == "Ekot" ~ "Sveriges Radio Ekot",
              Intervjuare == "GP" ~ "Göteborgs-Posten",
              Intervjuare == "TV4 Nyheterna" ~ "TV4",
+             Intervjuare == "Nyheter Idag" ~ "Svensk nischmedia",
+             Intervjuare == "Övrig svensk nischmedia" ~ "Svensk nischmedia",
              Intervjuare == "TV4" ~ "TV4",
              Intervjuare == "Anger ej" ~ "Angav ej tillhörighet",
              TRUE ~ as.character(Intervjuare)
@@ -356,6 +360,7 @@ kritiska_fragor_intervjuare_plot <- function(m) {
   
   # Skapa figur relativ.
   plot_intervjuare <- topp_intervjuare %>% 
+    filter(Intervjuare != "Angav ej tillhörighet") %>% 
     mutate(kritik = case_when(
       kritik == 1 ~ "Kritisk fråga",
       kritik == 0 ~ "Ej kritisk fråga"),
@@ -378,6 +383,32 @@ kritiska_fragor_intervjuare_plot <- function(m) {
           axis.text = element_text(color="black"),
           panel.grid.major.y = element_blank())
   return(plot_intervjuare)
+}
+
+
+#' Jämför kritiska frågor från svenska respektive utländska journalister.
+#'
+#' @param m data frame med innehållsanalys.
+#'
+#' @return
+#' @export
+#'
+#' @examples
+kritiska_fragor_sverige_utlandet <- function(m) {
+  kritik_intervjuare <- m %>% 
+    filter(Medium == "FHM presskonferens") %>% 
+    mutate(kritik = if_else(kritik_mean > median(kritik_mean), 1, 0),
+           utlandsk_media = case_when(
+             Intervjuare == "Utländsk media" ~"Utländsk media",
+             TRUE ~ "Svensk media"
+           )) %>% 
+    group_by(utlandsk_media, kritik) %>% 
+    summarize(n = n()) %>% 
+    mutate(proportion = n / sum(n),
+           prop_kritik = case_when(
+             kritik == 1 ~ proportion,
+             kritik == 0 ~ 1-proportion
+           ))
 }
 
 
