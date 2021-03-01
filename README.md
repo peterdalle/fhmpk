@@ -13,6 +13,8 @@ Analysfiler finns i katalogen R.
 
 ## Data och kodbok
 
+[**Ladda ned datafil med innehållsanalys (SPSS-fil)**](https://raw.githubusercontent.com/peterdalle/fhmpk/main/Data/covid-210201_1.sav)
+
 Datafilen är kodad av Kalle Färm (singelkodad, utan reliabilitetsanalys) och
 inbegriper förutom en klassificering av turordningar/frågor även själva
 frågorna från både Folkhälsomyndighetens presskonferens, SVT samt Aftonbladet.
