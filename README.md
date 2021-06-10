@@ -2,6 +2,8 @@
 
 Kvantitativ innehållsanalys av journalisters frågor vid Folkhälsomyndighetens presskonferens 2020.
 
+Resultatet finns i bokkapitlet [Ställde journalisterna kritiska frågor under Folkhälsomyndighetens presskonferenser? (PDF)](https://mediestudier.se/wp-content/uploads/2021/03/Stallde-journalisterna-kritiska-fragor-under-FHMs-presskonferenser-1.pdf) som finns i boken [Journalistik i coronans tid](https://mediestudier.se/publikationer/journalistik-i-coronans-tid/) utgiven av Institutet för mediestudier.
+
 ## Analys
 
 Analysfiler finns i katalogen R.
@@ -16,10 +18,10 @@ Analysfiler finns i katalogen R.
 [**Ladda ned datafil med innehållsanalys (SPSS-fil)**](https://raw.githubusercontent.com/peterdalle/fhmpk/main/Data/covid-210201_1.sav)
 
 Datafilen är kodad av Kalle Färm (singelkodad, utan reliabilitetsanalys) och
-inbegriper förutom en klassificering av turordningar/frågor även själva
+inbegriper förutom en klassificering av turordningar/frågor (n = 1 215) även själva
 frågorna från både Folkhälsomyndighetens presskonferens, SVT samt Aftonbladet.
 
-Kodschema finns i appendix till bokkapitlet. 
+Kodschema finns i [appendix till bokkapitlet (PDF)](https://mediestudier.se/wp-content/uploads/2021/03/Stallde-journalisterna-kritiska-fragor-under-FHMs-presskonferenser-1.pdf#page=18). 
 
 ### Variabler i datafilen
 
