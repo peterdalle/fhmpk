@@ -17,11 +17,46 @@ Analysfiler finns i katalogen R.
 
 [**Ladda ned datafil med innehållsanalys (SPSS-fil)**](https://raw.githubusercontent.com/peterdalle/fhmpk/main/Data/covid-210201_1.sav)
 
+Förutom SPSS-fil finns även CSV, JSON och RDS (för programmeringsspråket R).
+
 Datafilen är kodad av Kalle Färm (singelkodad, utan reliabilitetsanalys) och
 inbegriper förutom en klassificering av turordningar/frågor (n = 1 215) även själva
 frågorna från både Folkhälsomyndighetens presskonferens, SVT samt Aftonbladet.
 
 Kodschema finns i [appendix till bokkapitlet (PDF)](https://mediestudier.se/wp-content/uploads/2021/03/Stallde-journalisterna-kritiska-fragor-under-FHMs-presskonferenser-1.pdf#page=18). 
+
+## Citera
+
+Datasetet (inklusive kod, kodschema och bokkapitel) finns att ladda ned via <https://snd.gu.se/sv/catalogue/study/2021-191>. 
+Här hittar du en fullständig dokumentation.
+
+Citera datasetet på följande vis:
+
+> Dahlgren, P. M. (2021). Journalisternas frågor under Folkhälsomyndighetens presskonferenser under coronapandemin 2020. *Svensk nationell datatjänst*. doi:10.5878/9hks-7g79
+
+*BibTeX:*
+
+```bibtex
+@misc{dahlgren_fhm_2021,
+  title = {Journalisternas frågor under Folkhälsomyndighetens
+           presskonferenser under coronapandemin 2020},
+  url = {https://doi.org/10.5878/9hks-7g79},
+  abstract = {Detta dataset innehåller frågor/turordningar som ställdes av
+    journalister under Folkhälsomyndighetens presskonferenser under
+    coronapandemin under hela 2020, samt under personliga intervjuer med
+    myndighetsföreträdare (främst Folkhälsomyndigheten) i Aftonbladets
+    webb-tv och i Sveriges Televisions direktsända tv-sändningar direkt
+    efter presskonferenserna. Syftet var att undersöka hur stor andel av
+    journalisternas frågor var kritiska. Datan är insamlad genom en
+    kvantitativ innehållsanalys som kodats för hand av en enskild kodare.
+    Totalt ingår 1 215 frågor/turordningar (med 26 variabler) som ställdes
+    av journalister, insamlade under perioden 2020-03-06 till 2020-12-29.},
+  language = {Svenska},
+  publisher = {Svensk nationell datatjänst},
+  author = {Dahlgren, Peter M.},
+  year = {2021}
+}
+```
 
 ### Variabler i datafilen
 
@@ -29,7 +64,7 @@ Kodschema finns i [appendix till bokkapitlet (PDF)](https://mediestudier.se/wp-c
 # summarytools::dfSummary(df)
 
 Data Frame Summary 
-Dimensions: 1215 x 35  
+Dimensions: 1215 x 26   
 Duplicates: 0  
 
 -----------------------------------------------------------------------------------------------------------------------------------

@@ -1,11 +1,13 @@
 #' Returnera data frame med presskonferenser (alla datum + samplade datum)
 #'
+#' @param filename Filnamn på Xlsx-fil med dagar för presskonferenserna.
+#'
 #' @return
 #' @export
 #'
 #' @examples
-press_conferences <- function() {
-  df <- rio::import("../data/Dagar.xlsx")
+press_conferences <- function(filename) {
+  df <- rio::import(filename)
   df <- df %>% 
     mutate(veckodag = as.factor(veckodag),
            presskonferens = case_when(
@@ -20,15 +22,21 @@ press_conferences <- function() {
 
 #' Returnera data frame med döda i covid-19 per dag från Soc
 #'
+#' @param download_latest boolean om huruvida senaste datan ska laddas ned.
+#' @param filename filnamn på filen som ska läsas (eller sparas som, om 
+#' download_latest=TRUE).
+#'
 #' @return
 #' @export
 #'
 #' @examples
-covid_deaths_socialstyrelsen <- function() {
-  # Data från Socialstyrelsen, sammanställd av Adam Altmejd
-  url <- "https://github.com/adamaltmejd/covid/blob/master/data/Socialstyrelsen_latest.csv?raw=true"
-  download.file(url, destfile = "../data/socialstyrelsen_latest.csv")
-  covid <- read.csv("../data/socialstyrelsen_latest.csv")
+covid_deaths_socialstyrelsen <- function(filename, download_latest=FALSE) {
+  if (download_latest) {
+    # Data från Socialstyrelsen, sammanställd av Adam Altmejd
+    url <- "https://github.com/adamaltmejd/covid/blob/master/data/Socialstyrelsen_latest.csv?raw=true"
+    download.file(url, destfile = filename)
+  }
+  covid <- read.csv(filename)
   covid_deaths_per_day <- covid %>% 
     filter(!(is.na(date) | date == "")) %>% 
     mutate(date = as.Date(date)) %>% 
@@ -42,12 +50,13 @@ covid_deaths_socialstyrelsen <- function() {
 
 #' Returnera data frame med innehållsanalysen (från SPSS-fil)
 #'
+#' @param filename filnamnet på SPSS-filen att läsa in.
+#'
 #' @return
 #' @export
 #'
 #' @examples
-content_analysis <- function() {
-  filename <- "../data/covid-210201_1.sav"
+content_analysis <- function(filename) {
   content <- rio::import(filename)
   content <- rio::factorize(content)
   content$id <- seq.int(1, NROW(content))
@@ -79,7 +88,8 @@ over_tid_index <- function(m, medium="FHM presskonferens", group_average=FALSE) 
   m_konflikt <- m %>% 
     filter(Medium == medium) %>% 
     mutate(konflikt = fct_collapse(Fientlig, 
-                                   Ja = c("Söker svar", "Inledning korrekt", "Kombination"),
+                                   Ja = c("Söker svar", "Inledning korrekt", 
+                                          "Kombination"),
                                    Nej = c("Nej", "Vet ej"))) %>% 
     select(dag, konflikt) %>% 
     group_by(dag) %>% 
@@ -214,12 +224,12 @@ kritik_index <- function(m) {
 #'
 #' @examples
 kritiska_fragor_procent <- function(m) {
-  # andel kritiska frågor, alla indikatorer sammanvägda
+  # Andel kritiska frågor, alla indikatorer sammanvägda.
   m_total_avg_svt <- over_tid_index(m, medium="SVT intervju", group_average=TRUE)
   m_total_avg_ab  <- over_tid_index(m, medium="AB intervju", group_average=TRUE)
   m_total_avg_fhm <- over_tid_index(m, medium="FHM presskonferens", group_average=TRUE)
   
-  # positioner för geom_text_repel
+  # Positioner för geom_text_repel.
   m_total_avg_svt$x_pos <- as.Date("2020-11-15")
   m_total_avg_ab$x_pos  <- as.Date("2020-08-01")
   m_total_avg_fhm$x_pos <- as.Date("2020-12-01")
@@ -229,7 +239,7 @@ kritiska_fragor_procent <- function(m) {
   
   m_total_avg <- rbind(m_total_avg_svt, m_total_avg_ab, m_total_avg_fhm)
   
-  # y används som D.V. i graferna
+  # Y används som beroendevariabel i graferna.
   m_total_avg$y <- m_total_avg$percent
   
   return(m_total_avg)
@@ -250,9 +260,9 @@ over_time_index_plot <- function(df, title=NULL, subtitle=NULL) {
   x <- df %>% 
     mutate(medium = case_when(medium == "SVT intervju" ~ "Intervju i SVT",
                               medium == "AB intervju" ~ "Intervju i Aftonbladet",
-                              medium == "FHM presskonferens" ~ "Folkhälsomyndighetens\npresskonferens")) %>% 
+                              medium == "FHM presskonferens" ~ 
+                                  "Folkhälsomyndighetens\npresskonferens")) %>% 
     ggplot(aes(dag, y, group=medium, color=medium, linetype=medium)) +
-    #geom_point(alpha=.3, size=2) +
     geom_smooth(formula=y~x, method="loess", se=FALSE, fullrange=FALSE, 
                 level=0.95, span=0.6, alpha=.1, size=1.2) +
     geom_text_repel(aes(x=x_pos, y=y_pos, label=if_else(dag==min(dag), medium, NULL),
@@ -263,8 +273,6 @@ over_time_index_plot <- function(df, title=NULL, subtitle=NULL) {
     theme_classic() +
     theme(axis.text = element_text(color="black"),
           panel.grid.major.y = element_line(color="#f5f5f5"),
-          #panel.grid.minor.x = element_blank(),
-          #panel.grid.major.x = element_blank(),
           legend.position="none") +
     labs(title = title,
          subtitle = subtitle, 
@@ -435,16 +443,18 @@ topics_per_day_plot <- function(topics_per_day) {
   topics_per_day$label[topics_per_day$dag < max(topics_per_day$dag)] <- ""
   
   # Linjen för drabbade grupper slutar lite tidigt så vi får försöka placera den manuellt.
-  topics_per_day$label[topics_per_day$topic == "Drabbade grupper" & topics_per_day$dag == as.Date("2020-08-27")] <- "Drabbade\ngrupper"
-  topics_per_day$y_pos[topics_per_day$topic == "Drabbade grupper" & topics_per_day$dag == as.Date("2020-08-27")] <- .22
-  topics_per_day$x_pos[topics_per_day$topic == "Drabbade grupper" & topics_per_day$dag == as.Date("2020-08-27")] <- as.Date("2020-11-07")
+  topics_per_day$label[topics_per_day$topic == "Drabbade grupper" & 
+                         topics_per_day$dag == as.Date("2020-08-27")] <- "Drabbade\ngrupper"
+  topics_per_day$y_pos[topics_per_day$topic == "Drabbade grupper" & 
+                         topics_per_day$dag == as.Date("2020-08-27")] <- .22
+  topics_per_day$x_pos[topics_per_day$topic == "Drabbade grupper" & 
+                         topics_per_day$dag == as.Date("2020-08-27")] <- as.Date("2020-11-07")
   
   figure <- topics_per_day %>% 
     filter(topic != "Övrigt") %>% 
     filter(topic != "Organisationer") %>% 
     mutate(topic = as.factor(topic)) %>% 
     ggplot(aes(dag, percent/100, group=topic, color=topic, linetype=topic)) +
-    #geom_point(alpha=.2) +
     geom_smooth(size=1.3, se=FALSE, formula=y~x, method="loess",
                 span=.7, fullrange=TRUE) +
     geom_text(aes(x=x_pos, y=y_pos, label=label, fontface="plain"), hjust=-.1) +
@@ -462,14 +472,12 @@ topics_per_day_plot <- function(topics_per_day) {
     theme_classic() +
     theme(axis.text = element_text(color="black"),
           panel.grid.major.y = element_line(color="#f5f5f5"),
-          #panel.grid.minor.x = element_blank(),
-          #panel.grid.major.x = element_blank(),
           legend.position="none",
           plot.margin = unit(c(1, 7, 1, 1), "lines")) 
   
-  # Detta inkl hjust=-.1 + plot.margin ovanm gör att man kan plotta utanför diagrammet.
+  # Detta (samt hjust=-.1 + plot.margin ovan) gör att man kan plotta utanför diagrammet.
   gt <- ggplotGrob(figure)
   gt$layout$clip[gt$layout$name == "panel"] <- "off"
-  #grid::grid.draw(gt)
+  #grid::grid.draw(gt)  # förhandsgranska i viewern
   return(gt)
 }

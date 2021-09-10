@@ -1,15 +1,14 @@
 library(tidyverse)
-library(furniture)  # remotes::install_github("tysonstanley/furniture")
+library(furniture)
 library(scales)
 library(ggrepel)
-library(surveyutils) # devtools::install_github("peterdalle/surveyutils")
 library(gridExtra)
 library(tidytext)
 
 source("functions.r", encoding="UTF-8")
 
 # Hämta innehållsanalysen och lägg på kritiska frågor (omkodade).
-m <- content_analysis()
+m <- content_analysis(filename="../data/covid-210201_1.sav")
 m <- kritik_index(m)
 
 # Tidigaste/senaste samplingdatum för respektive medium m.m.
@@ -21,36 +20,36 @@ m %>%
             n = n())
 
 # Frekvens på varje variabel.
-furniture::tableF(m, Datum)
-furniture::tableF(m, dag)
-furniture::tableF(m, Medium)
-furniture::tableF(m, Tidskod)
-furniture::tableF(m, IntervjuPlats)
-furniture::tableF(m, Intervjuare)
-furniture::tableF(m, Respondent)
-furniture::tableF(m, Turordning)
-furniture::tableF(m, Frågenummer)
-furniture::tableF(m, Uppföljningsfråga)
-furniture::tableF(m, Komplexitet)
-furniture::tableF(m, Ämne, n = Inf)
-furniture::tableF(m, Självreferens)
-furniture::tableF(m, Rättframhet)
-furniture::tableF(m, Rådsökande)
-furniture::tableF(m, Spekulerande)
-furniture::tableF(m, Upprepning)
-furniture::tableF(m, Personlig)
-furniture::tableF(m, TredjePart)
-furniture::tableF(m, NegativForm)
-furniture::tableF(m, Men)
-furniture::tableF(m, JaNej)
-furniture::tableF(m, Ansvarsutkrävande)
-furniture::tableF(m, Fientlig)
-furniture::tableF(m, Ton)
-furniture::tableF(m, PratarIMun)
+tableF(m, Datum)
+tableF(m, dag)
+tableF(m, Medium)
+tableF(m, Tidskod)
+tableF(m, IntervjuPlats)
+tableF(m, Intervjuare)
+tableF(m, Respondent)
+tableF(m, Turordning)
+tableF(m, Frågenummer)
+tableF(m, Uppföljningsfråga)
+tableF(m, Komplexitet)
+tableF(m, Ämne, n = Inf)
+tableF(m, Självreferens)
+tableF(m, Rättframhet)
+tableF(m, Rådsökande)
+tableF(m, Spekulerande)
+tableF(m, Upprepning)
+tableF(m, Personlig)
+tableF(m, TredjePart)
+tableF(m, NegativForm)
+tableF(m, Men)
+tableF(m, JaNej)
+tableF(m, Ansvarsutkrävande)
+tableF(m, Fientlig)
+tableF(m, Ton)
+tableF(m, PratarIMun)
 
 
 # Tabell 1.
-furniture::table1(m,
+table1(m,
     "Respondent" = fct_collapse(Respondent, 
                    Tegnell = c("FHM: Tegnell"),
                    Tegmark = c("FHM: Tegmark Wisell"),
@@ -110,15 +109,11 @@ kritik_percent %>%
             median_kritik = mean(percent_median)) %>%
   mutate(total = sum(mean(mean_kritik)))
 
-
 # Plocka ut några exmepel på kritiska frågor.
 m %>% 
   filter(Ansvarsutkrävande == "Varför" & 
-           #Rättframhet == "Förmåga" & 
-           #Fientlig == "Söker svar" & 
            Men == "Ja" &
            NegativForm == "Ja" 
-         #Uppföljningsfråga == "Nej"
   ) %>% 
   pull(dag, Transkribering) %>% 
   head(10)
@@ -210,7 +205,6 @@ topics_per_day <- m %>%
   group_by(dag, topic) %>% 
   summarize(n = n()) %>% 
   mutate(percent = round((n / sum(n)) * 100)) 
-  #arrange(desc(percent))
 
 
 # Figur 3. Vad journalisternas frågor handlar om.
@@ -248,3 +242,4 @@ m %>%
   group_by(munskydd) %>% 
   summarize(n = n()) %>% 
   mutate(percent = (n / sum(n)) * 100)
+

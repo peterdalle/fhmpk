@@ -1,15 +1,18 @@
 library(tidyverse)
 library(rio)
-library(ggTimeSeries)  # devtools::install_github('Ather-Energy/ggTimeSeries')
 library(gridExtra)
+library(ggTimeSeries)  # devtools::install_github('Ather-Energy/ggTimeSeries')
+                       # Se även arkiverad kopia av ggTimeSeries på CRAN:
+                       # https://cran.r-project.org/package=ggTimeSeries
 
 source("functions.r", encoding="UTF-8")
 
-# Hämta data över presskonferenser, döda i covid-19 samt innehållsanalysen.
-pk <- press_conferences()
-covid_deaths_per_day <- covid_deaths_socialstyrelsen()
-m <- content_analysis()
-
+# Hämta data över innehållsanalysen, presskonferenser samt döda i covid-19.
+m <- content_analysis(filename="../data/covid-210201_1.sav")
+pk <- press_conferences(filename="../data/dagar.xlsx")
+covid_deaths_per_day <- covid_deaths_socialstyrelsen(
+                              filename="../data/socialstyrelsen_2021-02-17.csv",
+                              download_latest=FALSE)
 
 # Figur 1 övre del: dödsfall per dag.
 plot_deaths <- covid_deaths_per_day %>% 
@@ -24,14 +27,11 @@ plot_deaths <- covid_deaths_per_day %>%
     theme(axis.text = element_text(color="black"),
           panel.grid.major.y = element_line(color="#f5f5f5")) +
     labs(title = "Antal dödsfall med covid-19 i Sverige under 2020",
-         #caption = "Källa: Socialstyrelsen",
          x = NULL,
          y = NULL)
 
-
 # Antal presskonferenser totalt (dagar).
 sum(pk$presskonferens)
-
 
 # Lägg på antal kodade frågor/turordningar för varje datum.
 pk_kodad <- pk %>% 
@@ -59,11 +59,6 @@ plot_pk <- ggplot_calendar_heatmap(pk_kodad, 'dag', 'kategori',
         strip.text = element_blank(), 
         plot.margin = unit(c(0, 8, 0, 5), "mm")
   ) +
-  #scale_x_continuous(
-  # breaks = 3:12,
-  #labels = c("mar", "apr", "maj", "jun", "jul", "aug", "sep", "okt", "nov", "dec"),
-  #expand = c(0, 0)
-  #) +
   scale_y_continuous(
     trans = "reverse",
     breaks = c(1:7),
@@ -71,12 +66,10 @@ plot_pk <- ggplot_calendar_heatmap(pk_kodad, 'dag', 'kategori',
     expand = c(0, 0)
   ) +
   labs(title = "Folkhälsomyndighetens presskonferenser (färgade rutor) under 2020", 
-       #subtitle = "Varje presskonferens markerad i grått"
        y = NULL, 
        x = NULL, 
        fill=NULL
   )
-
 
 # Slå ihop övre och nedre del av figur 1.
 plot_combined <- grid.arrange(plot_deaths, plot_pk, layout_matrix=rbind(1, 
